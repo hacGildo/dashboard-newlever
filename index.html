@@ -279,17 +279,17 @@
             <div class="card">
                 <div class="card-title"><i class="fas fa-hand-holding-usd"></i> Total em Aportes</div>
                 <div class="card-value">R$ 306.348,00</div>
-                <div class="card-trend up"><i class="fas fa-arrow-up"></i> +425% desde Jul/2024</div>
+                <div class="card-trend up"><i class="fas fa-arrow-up"></i> +<span id="aporte-growth">0</span>% desde Jul/2024</div>
             </div>
             <div class="card">
                 <div class="card-title"><i class="fas fa-store"></i> Total em Receitas</div>
                 <div class="card-value">R$ 307.321,45</div>
-                <div class="card-trend up"><i class="fas fa-arrow-up"></i> +382% desde Set/2024</div>
+                <div class="card-trend up"><i class="fas fa-arrow-up"></i> +<span id="receita-growth">0</span>% desde Set/2024</div>
             </div>
             <div class="card">
                 <div class="card-title"><i class="fas fa-users"></i> Clientes Ativos</div>
                 <div class="card-value">16</div>
-                <div class="card-trend up"><i class="fas fa-chart-pie"></i> 5 clientes = 80% da receita</div>
+                <div class="card-trend up"><i class="fas fa-chart-pie"></i> 5 clientes = <span id="client-percent">0</span>% da receita</div>
             </div>
         </div>
         
@@ -323,8 +323,8 @@
         <div class="insights-recommendations">
             <div class="insights">
                 <h3 class="insights-title"><i class="fas fa-lightbulb"></i> Principais Insights</h3>
-                <div class="insight-item">Crescimento consistente mês a mês, com aumento de 425% nos aportes desde jul/2024.</div>
-                <div class="insight-item">5 clientes (LEAP EDU, ARAUZ & ADVOGADOS, R. AMARAL ADVOGADOS, Andre Menescal e MARTORELLI ADVOGADOS) representam mais de 80% da receita.</div>
+                <div class="insight-item">Crescimento consistente mês a mês, com aumento de <span id="aporte-insight">0</span>% nos aportes desde jul/2024.</div>
+                <div class="insight-item">5 clientes (LEAP EDU, ARAUZ & ADVOGADOS, R. AMARAL ADVOGADOS, Andre Menescal e MARTORELLI ADVOGADOS) representam mais de <span id="client-insight">0</span>% da receita.</div>
                 <div class="insight-item">Os sócios mantiveram aportes regulares, com valores aumentando ao longo do tempo (de R$ 2.087 para R$ 15.000).</div>
                 <div class="insight-item">Baixo índice de inadimplência - mais de 95% dos valores já foram recebidos ou conciliados.</div>
                 <div class="insight-item">Diversificação da base de clientes a partir de março/2025, com vários clientes menores.</div>
@@ -470,7 +470,32 @@
             indexAxis: 'y'
         };
         
-        // Inicializar gráficos
+        // Calcular percentagens reais
+        function calcularPercentagens() {
+            // Calcular crescimento de aportes desde jul/2024
+            const primeiroAporte = monthlyData.datasets[0].data[0]; // Jul/2024: 8348
+            const totalAportes = typeData.datasets[0].data[0]; // Total: 306348
+            const crescimentoAportes = ((totalAportes - primeiroAporte) / primeiroAporte) * 100;
+            
+            // Calcular crescimento de receitas desde set/2024
+            const primeiraReceitaSignificativa = monthlyData.datasets[1].data[2]; // Set/2024: 6569.5
+            const totalReceitas = typeData.datasets[0].data[1]; // Total: 307321.45
+            const crescimentoReceitas = ((totalReceitas - primeiraReceitaSignificativa) / primeiraReceitaSignificativa) * 100;
+            
+            // Calcular percentual dos 5 principais clientes
+            const totalTop5Clientes = clientsData.datasets[0].data.reduce((acc, val) => acc + val, 0);
+            const percentualTop5 = (totalTop5Clientes / totalReceitas) * 100;
+            
+            // Atualizar os valores na interface
+            document.getElementById('aporte-growth').textContent = crescimentoAportes.toFixed(0);
+            document.getElementById('receita-growth').textContent = crescimentoReceitas.toFixed(0);
+            document.getElementById('client-percent').textContent = percentualTop5.toFixed(0);
+            
+            document.getElementById('aporte-insight').textContent = crescimentoAportes.toFixed(0);
+            document.getElementById('client-insight').textContent = percentualTop5.toFixed(0);
+        }
+        
+        // Inicializar gráficos e calcular percentagens
         window.onload = function() {
             new Chart(document.getElementById('monthlyChart'), {
                 type: 'bar',
@@ -495,11 +520,10 @@
                 data: partnersData,
                 options: barChartOptions
             });
+            
+            // Calcular e atualizar as percentagens
+            calcularPercentagens();
         };
     </script>
 </body>
 </html>
-
-
-
-
