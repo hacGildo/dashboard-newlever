@@ -3,426 +3,393 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Financeiro - New Lever</title>
+    <title>Dashboard de Análise de Honorários</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
         body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
             background-color: #f5f7f9;
             color: #333;
-            padding: 20px;
         }
-        
         .dashboard {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
         }
-        
-        header {
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #2c3e50, #4a6491);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .summary-cards {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid #ddd;
-            margin-bottom: 30px;
-        }
-        
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        
-        .periodo {
-            color: #7f8c8d;
-            font-size: 16px;
-        }
-        
-        .kpi-cards {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            flex-wrap: wrap;
             gap: 20px;
             margin-bottom: 30px;
         }
-        
-        .kpi-card {
+        .card {
+            flex: 1;
+            min-width: 200px;
             background: white;
-            border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
-        
-        .kpi-title {
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-bottom: 10px;
+        .card h3 {
+            margin-top: 0;
+            color: #2c3e50;
         }
-        
-        .kpi-value {
+        .card .value {
             font-size: 24px;
             font-weight: bold;
             color: #2c3e50;
         }
-        
-        .kpi-growth {
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        
-        .positive {
-            color: #27ae60;
-        }
-        
         .charts-container {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
-        
-        .chart-card {
+        .chart-wrapper {
             background: white;
-            border-radius: 10px;
             padding: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
         .chart-title {
-            font-size: 18px;
+            text-align: center;
+            margin-top: 0;
             margin-bottom: 15px;
             color: #2c3e50;
         }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
         }
-        
-        .full-width {
-            grid-column: 1 / -1;
-        }
-        
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
         th, td {
             padding: 12px 15px;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }
-        
         th {
-            background-color: #f8f9fa;
-            font-weight: 600;
+            background-color: #2c3e50;
+            color: white;
         }
-        
         tr:hover {
             background-color: #f5f5f5;
         }
-        
-        .insights {
-            background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        
-        .insight-title {
-            font-size: 18px;
-            margin-bottom: 15px;
+        .highlight {
+            font-weight: bold;
             color: #2c3e50;
         }
-        
-        .insight-list {
-            list-style-type: none;
-        }
-        
-        .insight-list li {
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .insight-list li:last-child {
-            border-bottom: none;
-        }
-        
-        @media (max-width: 1200px) {
-            .kpi-cards {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
+        @media (max-width: 768px) {
             .charts-container {
                 grid-template-columns: 1fr;
             }
-        }
-        
-        @media (max-width: 768px) {
-            .kpi-cards {
-                grid-template-columns: 1fr;
+            .summary-cards {
+                flex-direction: column;
             }
         }
     </style>
 </head>
 <body>
     <div class="dashboard">
-        <header>
-            <div class="logo">Dashboard Financeiro - New Lever</div>
-            <div class="periodo">Jul/2024 a Ago/2025</div>
-        </header>
-        
-        <div class="kpi-cards">
-            <div class="kpi-card">
-                <div class="kpi-title">Receita Total</div>
-                <div class="kpi-value">R$ 479.597</div>
-                <div class="kpi-growth positive">+223% CAGR</div>
+        <div class="header">
+            <h1>Dashboard de Análise de Honorários</h1>
+            <p>Análise de centros de custo, custos fixos, custos variáveis, despesas fixas e despesas variáveis</p>
+        </div>
+
+        <div class="summary-cards">
+            <div class="card">
+                <h3>Total em Honorários</h3>
+                <div class="value">R$ 394.392,58</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Ticket Médio</div>
-                <div class="kpi-value">R$ 7.586</div>
-                <div class="kpi-growth positive">+8,4% vs início</div>
+            <div class="card">
+                <h3>Custos Fixos</h3>
+                <div class="value">R$ 285.787,56</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Retenção de Clientes</div>
-                <div class="kpi-value">100%</div>
-                <div class="kpi-growth positive">Todos clientes recorrentes</div>
+            <div class="card">
+                <h3>Despesas Fixas</h3>
+                <div class="value">R$ 91.371,02</div>
             </div>
-            <div class="kpi-card">
-                <div class="kpi-title">Principal Cliente</div>
-                <div class="kpi-value">LEAP EDU</div>
-                <div class="kpi-growth">R$ 93.850</div>
+            <div class="card">
+                <h3>Custos Variáveis</h3>
+                <div class="value">R$ 13.634,78</div>
+            </div>
+            <div class="card">
+                <h3>Despesas Variáveis</h3>
+                <div class="value">R$ 3.599,22</div>
             </div>
         </div>
-        
+
         <div class="charts-container">
-            <div class="chart-card">
-                <div class="chart-title">Evolução das Receitas Mensais</div>
-                <div class="chart-container">
-                    <canvas id="revenueChart"></canvas>
-                </div>
+            <div class="chart-wrapper">
+                <h3 class="chart-title">Distribuição por Centro de Custo</h3>
+                <canvas id="costCenterChart"></canvas>
             </div>
-            <div class="chart-card">
-                <div class="chart-title">Composição das Receitas</div>
-                <div class="chart-container">
-                    <canvas id="compositionChart"></canvas>
-                </div>
+            <div class="chart-wrapper">
+                <h3 class="chart-title">Distribuição por Natureza</h3>
+                <canvas id="natureChart"></canvas>
             </div>
-            <div class="chart-card">
-                <div class="chart-title">Top 7 Clientes por Faturamento</div>
-                <div class="chart-container">
-                    <canvas id="clientsChart"></canvas>
-                </div>
+            <div class="chart-wrapper">
+                <h3 class="chart-title">Evolução Mensal de Honorários</h3>
+                <canvas id="monthlyTrendChart"></canvas>
             </div>
-            <div class="chart-card">
-                <div class="chart-title">Evolução do Ticket Médio</div>
-                <div class="chart-container">
-                    <canvas id="ticketChart"></canvas>
-                </div>
+            <div class="chart-wrapper">
+                <h3 class="chart-title">Top 10 Fornecedores/Colaboradores</h3>
+                <canvas id="supplierChart"></canvas>
             </div>
         </div>
-        
-        <div class="insights">
-            <div class="insight-title">Principais Insights</div>
-            <ul class="insight-list">
-                <li><strong>Crescimento Sólido:</strong> CAGR de 223,45% ao ano (crescimento exponencial)</li>
-                <li><strong>Diversificação:</strong> Transição de dependência de aportes para receitas operacionais</li>
-                <li><strong>Clientes Fiéis:</strong> ARAUZ & ADVOGADOS mostra fidelidade com 9 meses consecutivos</li>
-                <li><strong>Ticket Médio Crescente:</strong> De R$ 7.000 para R$ 7.586,33 (aumento de 8,4%)</li>
-                <li><strong>Alta Retenção:</strong> 100% dos clientes ativos são recorrentes</li>
-            </ul>
-        </div>
-        
-        <div class="chart-card full-width">
-            <div class="chart-title">Detalhamento de Receitas por Mês</div>
-            <div class="chart-container">
-                <canvas id="monthlyDetailChart"></canvas>
-            </div>
+
+        <div class="chart-wrapper">
+            <h3 class="chart-title">Detalhamento por Categoria e Natureza</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Categoria</th>
+                        <th>Natureza</th>
+                        <th>Valor (R$)</th>
+                        <th>Percentual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Honorários (Colaboradores)</td>
+                        <td>Custos Fixos</td>
+                        <td>R$ 193.328,25</td>
+                        <td>49.02%</td>
+                    </tr>
+                    <tr>
+                        <td>Honorários Estagiários</td>
+                        <td>Custos Fixos</td>
+                        <td>R$ 88.402,06</td>
+                        <td>22.42%</td>
+                    </tr>
+                    <tr>
+                        <td>Honorários Contábeis</td>
+                        <td>Despesas Fixas</td>
+                        <td>R$ 33.659,12</td>
+                        <td>8.54%</td>
+                    </tr>
+                    <tr>
+                        <td>Honorários Consultoria</td>
+                        <td>Despesas Fixas</td>
+                        <td>R$ 28.369,15</td>
+                        <td>7.19%</td>
+                    </tr>
+                    <tr>
+                        <td>Honorários (Colaboradores)</td>
+                        <td>Despesas Fixas</td>
+                        <td>R$ 29.342,75</td>
+                        <td>7.44%</td>
+                    </tr>
+                    <tr>
+                        <td>Honorários (Colaboradores)</td>
+                        <td>Custos Variáveis</td>
+                        <td>R$ 13.634,78</td>
+                        <td>3.46%</td>
+                    </tr>
+                    <tr>
+                        <td>Honorários (Colaboradores)</td>
+                        <td>Despesas Variáveis</td>
+                        <td>R$ 3.599,22</td>
+                        <td>0.91%</td>
+                    </tr>
+                    <tr class="highlight">
+                        <td>Total Geral</td>
+                        <td></td>
+                        <td>R$ 394.392,58</td>
+                        <td>100.00%</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Dados para os gráficos
-            const meses = ['Jul/24', 'Ago/24', 'Set/24', 'Out/24', 'Nov/24', 'Dez/24', 
-                          'Jan/25', 'Fev/25', 'Mar/25', 'Abr/25', 'Mai/25', 'Jun/25', 'Jul/25', 'Ago/25'];
-            
-            const receitasMensais = [8348, 47000, 40000, 46569.5, 46569.5, 
-                                    20365.45, 30032, 30032, 37070.25, 39417, 
-                                    30870.5, 40317, 41170.78, 22758.63];
-            
-            const ticketsMedios = [0, 7000, 6569.5, 6569.5, 10182.73, 
-                                  15016, 13116, 13116, 9267.56, 13139, 
-                                  7717.63, 10079.25, 8234.16, 7586.21];
-            
-            // Gráfico de Evolução de Receitas
-            const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-            new Chart(revenueCtx, {
-                type: 'line',
-                data: {
-                    labels: meses,
-                    datasets: [{
-                        label: 'Receita Mensal (R$)',
-                        data: receitasMensais,
-                        borderColor: '#3498db',
-                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
+        // Dados para os gráficos
+        const costCenterData = {
+            labels: ['Engenharia', 'Administração/Financeiro', 'Administração / Contabilidade', 'Administração / Jurídico', 'Inovação/Cliente', 'Comercial', 'Marketing / Produto', 'TI / Infraestrutura Digital', 'Marketing'],
+            datasets: [{
+                data: [243962.25, 91371.02, 33659.12, 18000, 15076.6, 8636.66, 2207.45, 380, 2500],
+                backgroundColor: [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#f8f9fc', '#5a5c69', '#2c9faf'
+                ]
+            }]
+        };
+
+        const natureData = {
+            labels: ['Custos Fixos', 'Despesas Fixas', 'Custos Variáveis', 'Despesas Variáveis'],
+            datasets: [{
+                data: [285787.56, 91371.02, 13634.78, 3599.22],
+                backgroundColor: ['#4e73df', '#1cc88a', '#36b9cc', '#f6c23e']
+            }]
+        };
+
+        const monthlyTrendData = {
+            labels: ['Jul/2024', 'Ago/2024', 'Set/2024', 'Out/2024', 'Nov/2024', 'Dez/2024', 'Jan/2025', 'Fev/2025', 'Mar/2025', 'Abr/2025', 'Mai/2025', 'Jun/2025', 'Jul/2025', 'Ago/2025'],
+            datasets: [
+                {
+                    label: 'Custos Fixos',
+                    data: [2720, 431.81, 17937.32, 21372.72, 30109.09, 33800, 27800, 28325.1, 36380, 37125.1, 42954.54, 35625.1, 35700, 24187.29],
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                    fill: true
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        title: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Valor (R$)'
-                            }
-                        }
-                    }
+                {
+                    label: 'Despesas Fixas',
+                    data: [1800, 900, 11719.15, 8600, 11231.81, 10819.15, 3000, 275.1, 4275.2, 2280.2, 2125.2, 1280.2, 2280.2, 1014.29],
+                    borderColor: '#1cc88a',
+                    backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                    fill: true
+                },
+                {
+                    label: 'Custos Variáveis',
+                    data: [0, 0, 0, 0, 318.33, 4000, 4000, 4000, 0, 0, 0, 1697.45, 0, 318.33],
+                    borderColor: '#36b9cc',
+                    backgroundColor: 'rgba(54, 185, 204, 0.1)',
+                    fill: true
+                },
+                {
+                    label: 'Despesas Variáveis',
+                    data: [250, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 200, 1500],
+                    borderColor: '#f6c23e',
+                    backgroundColor: 'rgba(246, 194, 62, 0.1)',
+                    fill: true
                 }
-            });
-            
-            // Gráfico de Composição de Receitas
-            const compositionCtx = document.getElementById('compositionChart').getContext('2d');
-            new Chart(compositionCtx, {
+            ]
+        };
+
+        const supplierData = {
+            labels: ['Gustavo TI', 'Felipe Rocha', 'João Vitor', 'Matheus Henrique', 'Gabriel Botelho', 'BRAVAU', 'Adriano TI', 'Carlos Willian', 'Quezia', 'M. Bari'],
+            datasets: [{
+                data: [59545.45, 18030.68, 16799.97, 16799.97, 16072.72, 14629.12, 30136.36, 12832.31, 28000, 10638.3],
+                backgroundColor: [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b', '#858796', '#f8f9fc', '#5a5c69', '#2c9faf', '#6f42c1'
+                ]
+            }]
+        };
+
+        // Configuração e inicialização dos gráficos
+        window.onload = function() {
+            new Chart(document.getElementById('costCenterChart'), {
                 type: 'doughnut',
-                data: {
-                    labels: ['Aportes', 'Vendas', 'Serviços'],
-                    datasets: [{
-                        data: [200054, 272543.36, 7000],
-                        backgroundColor: ['#FF6B6B', '#4ECDC4', '#45B7D1']
-                    }]
-                },
+                data: costCenterData,
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-            
-            // Gráfico de Top Clientes
-            const clientsCtx = document.getElementById('clientsChart').getContext('2d');
-            new Chart(clientsCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['LEAP EDU', 'ARAUZ & ADVOGADOS', 'R. AMARAL', 'Andre Menescal', 'Chenut', 'MARTORELLI', 'GM Advogados'],
-                    datasets: [{
-                        label: 'Faturamento (R$)',
-                        data: [93850, 59125.5, 52086.75, 39887.5, 13795.95, 11731.25, 2027.16],
-                        backgroundColor: '#9b59b6'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            title: {
-                                display: true,
-                                text: 'Valor (R$)'
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': R$ ' + context.raw.toFixed(2);
+                                }
                             }
                         }
                     }
                 }
             });
-            
-            // Gráfico de Evolução do Ticket Médio
-            const ticketCtx = document.getElementById('ticketChart').getContext('2d');
-            new Chart(ticketCtx, {
+
+            new Chart(document.getElementById('natureChart'), {
+                type: 'pie',
+                data: natureData,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.label + ': R$ ' + context.raw.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('monthlyTrendChart'), {
                 type: 'line',
-                data: {
-                    labels: meses.slice(1), // Remove jul/24 que não tinha ticket
-                    datasets: [{
-                        label: 'Ticket Médio (R$)',
-                        data: ticketsMedios,
-                        borderColor: '#e74c3c',
-                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                        fill: true,
-                        tension: 0.2
-                    }]
-                },
+                data: monthlyTrendData,
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
                     scales: {
                         y: {
-                            beginAtZero: false,
-                            title: {
-                                display: true,
-                                text: 'Valor (R$)'
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // Gráfico de Detalhamento Mensal (stacked)
-            const monthlyDetailCtx = document.getElementById('monthlyDetailChart').getContext('2d');
-            new Chart(monthlyDetailCtx, {
-                type: 'bar',
-                data: {
-                    labels: meses,
-                    datasets: [
-                        {
-                            label: 'Aportes',
-                            data: [8348, 40000, 40000, 40000, 40000, 0, 0, 0, 0, 0, 33000, 30000, 30000, 45000],
-                            backgroundColor: '#FF6B6B'
-                        },
-                        {
-                            label: 'Vendas',
-                            data: [0, 7000, 6569.5, 6569.5, 6569.5, 20365.45, 30032, 30032, 37070.25, 39417, 0, 10317, 11170.78, 0],
-                            backgroundColor: '#4ECDC4'
-                        },
-                        {
-                            label: 'Serviços',
-                            data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                            backgroundColor: '#45B7D1'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            stacked: true
-                        },
-                        y: {
-                            stacked: true,
                             beginAtZero: true,
                             title: {
                                 display: true,
                                 text: 'Valor (R$)'
                             }
                         }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': R$ ' + context.raw.toFixed(2);
+                                }
+                            }
+                        }
                     }
                 }
             });
-        });
+
+            new Chart(document.getElementById('supplierChart'), {
+                type: 'bar',
+                data: {
+                    labels: supplierData.labels,
+                    datasets: [{
+                        label: 'Valor em R$',
+                        data: supplierData.datasets[0].data,
+                        backgroundColor: supplierData.datasets[0].backgroundColor
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Valor (R$)'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return 'Valor: R$ ' + context.raw.toFixed(2);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        };
     </script>
 </body>
 </html>
